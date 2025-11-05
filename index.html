@@ -1,75 +1,200 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="./css/style.css"/>
 </head>
 <body>
-    <h1>Expense Tracker</h1>
+  <h1>Expense Tracker</h1>
 
-    <main>
-        <header>
-            <div>
-                <h5>Total Balance</h5>
-                <span id="balance">$0.00</span>
+  <!-- Barra superior: moneda + filtros rápidos -->
+  <nav aria-label="Controles y filtros" class="toolbar">
+    <div class="toolbar-group">
+      <label for="currency">Moneda</label>
+      <select id="currency" aria-label="Selector de moneda">
+        <option value="ARS" selected>ARS</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+    </div>
+
+    <div class="toolbar-group">
+      <label for="filterMonth">Mes</label>
+      <input type="month" id="filterMonth" aria-label="Filtrar por mes"/>
+    </div>
+
+    <div class="toolbar-group">
+      <label for="filterFrom">Desde</label>
+      <input type="date" id="filterFrom" aria-label="Fecha desde"/>
+    </div>
+
+    <div class="toolbar-group">
+      <label for="filterTo">Hasta</label>
+      <input type="date" id="filterTo" aria-label="Fecha hasta"/>
+    </div>
+
+    <div class="toolbar-group">
+      <label for="filterCategory">Categoría</label>
+      <select id="filterCategory" aria-label="Filtrar por categoría">
+        <option value="">Todas</option>
+        <option>Alimentación</option>
+        <option>Transporte</option>
+        <option>Hogar</option>
+        <option>Ocio</option>
+        <option>Salud</option>
+        <option>Educación</option>
+        <option>Ahorro</option>
+        <option>Otros</option>
+      </select>
+    </div>
+
+    <button id="clearFilters" type="button" class="btn-secondary">Limpiar filtros</button>
+  </nav>
+
+  <main>
+    <!-- Resumen -->
+    <header>
+      <div>
+        <h5>Total Balance</h5>
+        <span id="balance">$0.00</span>
+      </div>
+      <div>
+        <h5>Income</h5>
+        <span id="income">$0.00</span>
+      </div>
+      <div>
+        <h5>Expense</h5>
+        <span id="expense">$0.00</span>
+      </div>
+    </header>
+
+    <!-- Presupuestos por categoría -->
+    <section aria-labelledby="budgetsTitle">
+      <h3 id="budgetsTitle">Presupuestos del mes</h3>
+      <div id="budgets"></div>
+    </section>
+
+    <!-- Gráficos -->
+    <section aria-labelledby="chartsTitle">
+      <h3 id="chartsTitle">Visualizaciones</h3>
+      <div class="charts">
+        <figure>
+          <figcaption>Gasto por categoría (mes actual / filtros)</figcaption>
+          <canvas id="chartByCat" height="200"></canvas>
+        </figure>
+        <figure>
+          <figcaption>Evolución de gastos (últimos 6 meses)</figcaption>
+          <canvas id="chartByMonth" height="200"></canvas>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Lista de transacciones -->
+    <section>
+      <h3>Transactions</h3>
+      <ul id="transactionList" data-placeholder="No transactions."></ul>
+    </section>
+
+    <!-- Acciones de datos -->
+    <section aria-labelledby="dataActionsTitle">
+      <h3 id="dataActionsTitle">Datos</h3>
+      <div class="data-actions">
+        <button id="exportJSON" type="button">Exportar JSON</button>
+        <button id="exportCSV" type="button">Exportar CSV</button>
+        <label class="file-input">
+          <input type="file" id="importFile" accept=".json,.csv" />
+          Importar JSON/CSV
+        </label>
+        <button id="seedDemo" type="button" class="btn-secondary">Cargar datos de ejemplo</button>
+        <button id="resetData" type="button" class="btn-danger">Reset</button>
+      </div>
+    </section>
+
+    <!-- Formulario: agregar transacción -->
+    <section>
+      <h3>Add Transaction</h3>
+
+      <form id="transactionForm" autocomplete="off">
+        <div>
+          <label for="type">
+            <input type="checkbox" name="type" id="type" checked />
+            <div class="option" data-option="Income">
+              <span>Expense</span>
             </div>
+          </label>
+        </div>
 
-            <div>
-                <h5>Income</h5>
-                <span id="income">$0.00</span>
-            </div>
-            <div>
-                <h5>Expense</h5>
-                <span id="expense">$0.00</span>
-            </div>
-        </header>
+        <div>
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" required />
+        </div>
 
-        <section>
-            <h3>Transactions</h3>
-            <ul id="transactionList" data-placeholder="No transactions."></ul>
-        </section>
+        <div>
+          <label for="amount">Amount</label>
+          <input
+            type="number"
+            name="amount"
+            value="0"
+            min="0"
+            step="any"
+            inputmode="decimal"
+            id="amount"
+            required
+            onfocus="this.select()"
+          />
+        </div>
 
-        <section>
-            <h3>Add Transaction</h3>
+        <div>
+          <label for="date">Date</label>
+          <input type="date" name="date" id="date" required />
+        </div>
 
-            <form id="transactionForm">
-          <div>
-            <label for="type">
-              <input type="checkbox" name="type" id="type" checked />
-              <div class="option" data-option="Income">
-                <span>Expense</span>
-              </div>
-            </label>
-          </div>
-          <div>
-            <label for="name">Name</label>
-            <input type="text" name="name" id="name" required />
-          </div>
-          <div>
-            <label for="amount">Amount</label>
-            <input
-              type="number"
-              name="amount"
-              value="0"
-              min="0"
-              step="any"
-              inputmode="decimal"
-              id="amount"
-              required
-              onfocus="this.select()"
-            />
-          </div>
-          <div>
-            <label for="date">Date</label>
-            <input type="date" name="date" id="date" required />
-          </div>
-          <button type="submit">Submit</button>
-        </form>
-        </section>
-    </main>
+        <!-- NUEVO: categoría + etiquetas -->
+        <div>
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option>Alimentación</option>
+            <option>Transporte</option>
+            <option>Hogar</option>
+            <option>Ocio</option>
+            <option>Salud</option>
+            <option>Educación</option>
+            <option>Ahorro</option>
+            <option>Otros</option>
+          </select>
+        </div>
 
-    <script src="./js/main.js"></script>
+        <div>
+          <label for="tags">Tags</label>
+          <input id="tags" name="tags" placeholder="Etiquetas separadas por coma"/>
+        </div>
+
+        <!-- (Opcional futuro) Campos de recurrencia: se manejan por JS, no obligatorios en HTML
+        <fieldset>
+          <legend>Recurrencia</legend>
+          <label>
+            <input type="checkbox" id="recurring" />
+            Recurrente
+          </label>
+          <label for="recurrenceFreq">Frecuencia</label>
+          <select id="recurrenceFreq">
+            <option value="monthly">Mensual</option>
+            <option value="yearly">Anual</option>
+          </select>
+          <label for="recurrenceNext">Próxima fecha</label>
+          <input type="date" id="recurrenceNext"/>
+        </fieldset>
+        -->
+
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Chart.js CDN (necesario para los gráficos) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./js/main.js"></script>
 </body>
 </html>
