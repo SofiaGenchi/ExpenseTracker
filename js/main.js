@@ -1,15 +1,9 @@
-// =========================
-// Expense Tracker - main.js
-// =========================
-
-// ---------- Utils DOM ----------
 const $  = (s) => document.querySelector(s);
 
-// ---------- Config ----------
 const DB_KEY = "transactions";
-const DEFAULT_CURRENCY = "ARS";       // valor por defecto del selector
-const LOCALE = "es-AR";               // para separadores correctos
-const BUDGETS = {                     // presupuestos mensuales por categoría
+const DEFAULT_CURRENCY = "ARS";  
+const LOCALE = "es-AR";           
+const BUDGETS = {                     
   "Alimentación": 600000,
   "Transporte": 600000,
   "Hogar": 600000,
@@ -19,10 +13,10 @@ const BUDGETS = {                     // presupuestos mensuales por categoría
   "Ahorro": 600000,
   "Otros": 600000,
 };
-// Tasas estimadas (ejemplo simple). Si no querés conversión real, dejá todo en ARS.
+
 const RATES = { ARS: 1, USD: 1500, EUR: 1200 };
 
-// ---------- Estado / formato ----------
+
 function getCurrency() {
   const el = $("#currency");
   return el?.value || DEFAULT_CURRENCY;
@@ -38,13 +32,13 @@ function convert(amount, from, to) {
   return amount * (rFrom / rTo);
 }
 
-// ---------- Persistencia ----------
+
 function loadTx() {
   const raw = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  // Migración suave: asegurar tipos/campos
+
   return raw.map(t => {
     const dateISO = (() => {
-      // puede venir Date string, Date object, ISO, etc.
+
       try {
         const d = new Date(t.date);
         if (Number.isNaN(+d)) return new Date().toISOString().slice(0,10);
@@ -56,7 +50,7 @@ function loadTx() {
       type: t.type === "income" ? "income" : "expense",
       name: t.name || "Sin nombre",
       amount: Math.abs(Number(t.amount)) || 0,
-      date: dateISO, // guardamos como 'YYYY-MM-DD'
+      date: dateISO, 
       category: t.category || "Otros",
       tags: Array.isArray(t.tags) ? t.tags : (t.tags ? String(t.tags).split(",").map(x=>x.trim()).filter(Boolean) : []),
       currency: t.currency || DEFAULT_CURRENCY,
@@ -69,12 +63,11 @@ function saveTx(list) {
   localStorage.setItem(DB_KEY, JSON.stringify(list));
 }
 
-// ---------- Data helpers ----------
 function parseTags(str){ return str ? str.split(",").map(t=>t.trim()).filter(Boolean) : []; }
 
 function getFilters() {
   return {
-    month: $("#filterMonth")?.value || "",  // 'YYYY-MM'
+    month: $("#filterMonth")?.value || "",
     from:  $("#filterFrom")?.value || "",
     to:    $("#filterTo")?.value || "",
     cat:   $("#filterCategory")?.value || "",
@@ -99,7 +92,6 @@ function sumByTypeInCurrency(list, currency) {
   return { income: inc, expense: exp, balance: inc - exp };
 }
 
-// ---------- UI refs ----------
 const listEl    = $("#transactionList");
 const form      = $("#transactionForm");
 const balanceEl = $("#balance");
@@ -107,10 +99,8 @@ const incomeEl  = $("#income");
 const expenseEl = $("#expense");
 const dateInput = $("#date");
 
-// set default date = hoy
 if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
 
-// ---------- Toast ----------
 function toast(msg){
   const t=document.createElement("div");
   t.className="toast"; t.textContent=msg; document.body.appendChild(t);
@@ -118,7 +108,6 @@ function toast(msg){
   setTimeout(()=>{t.classList.remove("show"); t.remove();},2500);
 }
 
-// ---------- Render cabecera totals ----------
 function updateTotal() {
   const currency = getCurrency();
   const filtered = applyFilters(loadTx());
@@ -129,7 +118,6 @@ function updateTotal() {
   expenseEl.textContent = fmt(expense, currency);
 }
 
-// ---------- Lista ----------
 function createItem({ id, name, amount, date, type, category, tags, currency }) {
   const sign = type === "income" ? 1 : -1;
   const li = document.createElement("li");
@@ -156,7 +144,6 @@ function renderList() {
   filtered.forEach(tx => listEl.appendChild(createItem(tx)));
 }
 
-// ---------- Presupuestos ----------
 function computeSpentByCategory(list, yyyyMM){
   const spent = {};
   Object.keys(BUDGETS).forEach(c=>spent[c]=0);
@@ -169,14 +156,13 @@ function computeSpentByCategory(list, yyyyMM){
 }
 function renderBudgets() {
   const month = $("#filterMonth")?.value || new Date().toISOString().slice(0,7);
-  const filtered = loadTx(); // gastar del mes completo, no sólo filtros adicionales
+  const filtered = loadTx();
   const spent = computeSpentByCategory(filtered, month);
   const container = $("#budgets");
   if (!container) return;
   container.innerHTML = "";
 
   Object.entries(BUDGETS).forEach(([cat, limitARS])=>{
-    // convertir límite a la moneda actual para comparación/visual
     const limit = convert(limitARS, "ARS", getCurrency());
     const used = spent[cat] || 0;
     const pct = Math.min(100, Math.round((used/limit)*100));
@@ -195,7 +181,6 @@ function renderBudgets() {
   });
 }
 
-// ---------- Recurrentes ----------
 function materializeRecurrences(){
   const list = loadTx();
   const today = new Date().toISOString().slice(0,10);
@@ -205,7 +190,6 @@ function materializeRecurrences(){
     if (!tx.recurrence?.active) continue;
     let { freq, nextDate } = tx.recurrence;
     while (nextDate && nextDate <= today){
-      // clonar como transacción real en nextDate
       list.push({
         id: crypto.randomUUID(),
         type: tx.type,
@@ -216,7 +200,7 @@ function materializeRecurrences(){
         tags: tx.tags,
         currency: tx.currency,
       });
-      // avanzar nextDate
+
       const d = new Date(nextDate);
       if (freq === "monthly") d.setMonth(d.getMonth()+1);
       if (freq === "yearly")  d.setFullYear(d.getFullYear()+1);
@@ -231,7 +215,6 @@ function materializeRecurrences(){
   }
 }
 
-// ---------- Importar / Exportar ----------
 function download(name, content, type="application/json"){
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([content],{type}));
@@ -280,7 +263,6 @@ $("#importFile")?.addEventListener("change", async (e)=>{
   e.target.value = "";
 });
 
-// ---------- Charts (Chart.js) ----------
 let chartCat, chartMonth;
 function dataByCategory(list, yyyyMM){
   const map = {};
@@ -310,7 +292,7 @@ function renderCharts(){
   const list = loadTx();
   const month = $("#filterMonth")?.value || undefined;
 
-  // Pie por categoría
+
   const catMap = dataByCategory(applyFilters(list), month);
   const ctx1 = document.getElementById("chartByCat")?.getContext("2d");
   if (ctx1){
@@ -321,7 +303,6 @@ function renderCharts(){
     }});
   }
 
-  // Línea últimos 6 meses
   const {labels,values} = dataByMonth(list, 6);
   const ctx2 = document.getElementById("chartByMonth")?.getContext("2d");
   if (ctx2){
@@ -332,7 +313,7 @@ function renderCharts(){
   }
 }
 
-// ---------- CRUD ----------
+
 function deleteTransaction(id) {
   const list = loadTx();
   const index = list.findIndex((t)=>t.id===id);
@@ -371,7 +352,7 @@ function addTransaction(e) {
   render();
 }
 
-// ---------- Demo & Reset ----------
+
 function seedDemo(){
   const base = new Date();
   const iso = (d)=> new Date(d).toISOString().slice(0,10);
@@ -395,7 +376,7 @@ function resetData(){
   toast("Datos reiniciados");
 }
 
-// ---------- Render principal ----------
+
 function render(){
   updateTotal();
   renderList();
@@ -403,7 +384,6 @@ function render(){
   renderCharts();
 }
 
-// ---------- Eventos ----------
 form?.addEventListener("submit", addTransaction);
 ["filterMonth","filterFrom","filterTo","filterCategory","currency"].forEach(id=>{
   const el = document.getElementById(id);
@@ -419,7 +399,7 @@ $("#clearFilters")?.addEventListener("click", ()=>{
 $("#seedDemo")?.addEventListener("click", seedDemo);
 $("#resetData")?.addEventListener("click", resetData);
 
-// ---------- Init ----------
+
 (function init(){
   materializeRecurrences();
   render();

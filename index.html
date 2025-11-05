@@ -9,7 +9,6 @@
 <body>
   <h1>Expense Tracker</h1>
 
-  <!-- Barra superior: moneda + filtros rápidos -->
   <nav aria-label="Controles y filtros" class="toolbar">
     <div class="toolbar-group">
       <label for="currency">Moneda</label>
@@ -54,7 +53,6 @@
   </nav>
 
   <main>
-    <!-- Resumen -->
     <header>
       <div>
         <h5>Total Balance</h5>
@@ -70,13 +68,11 @@
       </div>
     </header>
 
-    <!-- Presupuestos por categoría -->
     <section aria-labelledby="budgetsTitle">
       <h3 id="budgetsTitle">Presupuestos del mes</h3>
       <div id="budgets"></div>
     </section>
 
-    <!-- Gráficos -->
     <section aria-labelledby="chartsTitle">
       <h3 id="chartsTitle">Visualizaciones</h3>
       <div class="charts">
@@ -91,13 +87,11 @@
       </div>
     </section>
 
-    <!-- Lista de transacciones -->
     <section>
       <h3>Transactions</h3>
       <ul id="transactionList" data-placeholder="No transactions."></ul>
     </section>
 
-    <!-- Acciones de datos -->
     <section aria-labelledby="dataActionsTitle">
       <h3 id="dataActionsTitle">Datos</h3>
       <div class="data-actions">
@@ -112,7 +106,6 @@
       </div>
     </section>
 
-    <!-- Formulario: agregar transacción -->
     <section>
       <h3>Add Transaction</h3>
 
@@ -151,7 +144,6 @@
           <input type="date" name="date" id="date" required />
         </div>
 
-        <!-- NUEVO: categoría + etiquetas -->
         <div>
           <label for="category">Category</label>
           <select id="category" name="category" required>
@@ -171,29 +163,11 @@
           <input id="tags" name="tags" placeholder="Etiquetas separadas por coma"/>
         </div>
 
-        <!-- (Opcional futuro) Campos de recurrencia: se manejan por JS, no obligatorios en HTML
-        <fieldset>
-          <legend>Recurrencia</legend>
-          <label>
-            <input type="checkbox" id="recurring" />
-            Recurrente
-          </label>
-          <label for="recurrenceFreq">Frecuencia</label>
-          <select id="recurrenceFreq">
-            <option value="monthly">Mensual</option>
-            <option value="yearly">Anual</option>
-          </select>
-          <label for="recurrenceNext">Próxima fecha</label>
-          <input type="date" id="recurrenceNext"/>
-        </fieldset>
-        -->
-
         <button type="submit">Submit</button>
       </form>
     </section>
   </main>
 
-  <!-- Chart.js CDN (necesario para los gráficos) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="./js/main.js"></script>
 </body>
